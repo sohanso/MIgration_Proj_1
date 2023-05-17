@@ -4,8 +4,11 @@ resource "aws_route53_record" "record_a" {
   zone_id = data.aws_route53_zone.sohan-mglab.zone_id
   name = "resolve-test"
   type    = "A"
-  ttl     = "300"
-  records = ["10.0.0.1"]
+  alias {
+    name                   = aws_lb.alb.dns_name
+    zone_id                = aws_lb.alb.zone_id
+    evaluate_target_health = true
+  }
 }
 
 ## TLS CERTIFICATE ##       
@@ -41,8 +44,127 @@ resource "aws_acm_certificate_validation" "cert_validation" {
   validation_record_fqdns = [for record in aws_route53_record.record_cert : record.fqdn]
 }
 
-# resource "aws_lb_listener" "example" {
 
-#   certificate_arn = aws_acm_certificate_validation.example.certificate_arn
+## ALB Security Group ##
+resource "aws_security_group" "alb_sg" {
+  name        = "app-load-sg"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = module.vpc.vpc_id
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  ingress {
+    description      = "http from VPC"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Project = "Migration-1"
+  }
+}
+
+## PgAdmin Security Group ##
+resource "aws_security_group" "pgadmin_sg" {
+  name        = "pgadmin_server_sg"
+  description = "Allow ALB inbound traffic"
+  vpc_id      = module.vpc.vpc_id
+  ingress {
+    description      = "ALB connection from VPC"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    security_groups = [aws_security_group.alb_sg]
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  tags = {
+    Project = "Migration-1"
+  }
+}
+
+
+## APPLICATION LOAD BALANCER ##
+resource "aws_lb" "alb" {
+  name               = "mg-alb"
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = module.vpc.public_subnets
+  # access_logs {
+  #   bucket  = "migration-1-tfstate"
+  #   prefix  = "alb-logs"
+  #   enabled = true
+  # }
+
+  tags = {
+    Environment = "production"
+  }
+}
+
+## TARGET GROUP AND LISTENER ##
+
+resource "aws_lb_target_group" "alb_tg" {
+  name     = "targetgroup-of-alb"
+  port     = 443
+  protocol = "HTTPS"
+  vpc_id   = module.vpc.vpc_id
+}
+
+resource "aws_lb_listener" "listener_https" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.mglab-cert.arn
+
+  default_action {
+    type             = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Hi looks like its working"
+      status_code = "200"
+    }
+  }
+}
+
+resource "aws_lb_listener" "listener_http" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+    redirect {
+      status_code = "HTTP_301"
+      port = "443"
+      protocol = "HTTPS"     
+    }
+  }
+}
+
+resource "aws_lb_listener_certificate" "alb_listener_cert" {
+  listener_arn    = aws_lb_listener.listener_https.arn
+  certificate_arn = aws_acm_certificate.mglab-cert.arn
+}
+# resource "aws_lb_target_group_attachment" "test" {
+#   target_group_arn = aws_lb_target_group.test.arn
+#   target_id        = aws_instance.test.id
+#   port             = 80
 # }
-

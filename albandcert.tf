@@ -118,14 +118,14 @@ resource "aws_lb" "alb" {
   }
 }
 
-## TARGET GROUP AND LISTENER ##
+# ## TARGET GROUP AND LISTENER ##
 
-# resource "aws_lb_target_group" "alb_tg" {
-#   name     = "targetgroup-of-alb"
-#   port     = 443
-#   protocol = "HTTPS"
-#   vpc_id   = module.vpc.vpc_id
-# }
+resource "aws_lb_target_group" "alb_tg" {
+  name     = "targetgroup-of-alb"
+  port     = 443
+  protocol = "HTTPS"
+  vpc_id   = module.vpc.vpc_id
+}
 
 resource "aws_lb_listener" "listener_https" {
   load_balancer_arn = aws_lb.alb.arn
@@ -135,12 +135,8 @@ resource "aws_lb_listener" "listener_https" {
   certificate_arn   = aws_acm_certificate.mglab-cert.arn
 
   default_action {
-    type             = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Hi looks like its working"
-      status_code = "200"
-    }
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg.arn
   }
 }
 
@@ -148,7 +144,6 @@ resource "aws_lb_listener" "listener_http" {
   load_balancer_arn = aws_lb.alb.arn
   port              = "80"
   protocol          = "HTTP"
-  certificate_arn = aws_acm_certificate.mglab-cert.arn
 
   default_action {
     type = "redirect"
@@ -160,10 +155,10 @@ resource "aws_lb_listener" "listener_http" {
   }
 }
 
-# resource "aws_lb_listener_certificate" "alb_listener_cert" {
-#   listener_arn    = aws_lb_listener.listener_https.arn
-#   certificate_arn = aws_acm_certificate.mglab-cert.arn
-# }
+resource "aws_lb_listener_certificate" "alb_listener_cert" {
+  listener_arn    = aws_lb_listener.listener_https.arn
+  certificate_arn = aws_acm_certificate.mglab-cert.arn
+}
 
 # resource "aws_lb_target_group_attachment" "test" {
 #   target_group_arn = aws_lb_target_group.alb_tg.arn
@@ -172,24 +167,5 @@ resource "aws_lb_listener" "listener_http" {
 #   depends_on = [ aws_autoscaling_group.pgadmin_asg ]
 # }
 
-# resource "aws_launch_template" "asg_template" {
-#   name_prefix   = "asg_launch_temp"
-#   image_id      = "ami-03aefa83246f44ef2"
-#   instance_type = "t3.micro"
-# }
 
-# resource "aws_autoscaling_group" "pgadmin_asg" {
-#   availability_zones = local.availability-zones
-#   desired_capacity   = 2
-#   max_size           = 3
-#   min_size           = 2
-#   health_check_grace_period = 400
-#   health_check_type         = "ELB"
-#   target_group_arns = [aws_lb_target_group.alb_tg.arn]
-
-#   launch_template {
-#     id = aws_launch_template.asg_template.id
-#     version = "$Latest"
-#   }
-# }
 

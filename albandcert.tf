@@ -2,7 +2,7 @@
 ## A record ##
 resource "aws_route53_record" "record_a" {
   zone_id = data.aws_route53_zone.sohan-mglab.zone_id
-  name = "resolve-test"
+  name = ""
   type    = "A"
   alias {
     name                   = aws_lb.alb.dns_name
@@ -87,7 +87,7 @@ resource "aws_security_group" "pgadmin_sg" {
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
-    security_groups = [aws_security_group.alb_sg]
+    security_groups = [aws_security_group.alb_sg.id]
   }
   egress {
     from_port        = 0
@@ -114,18 +114,18 @@ resource "aws_lb" "alb" {
   # }
 
   tags = {
-    Environment = "production"
+    Project = "Migration-1"
   }
 }
 
 ## TARGET GROUP AND LISTENER ##
 
-resource "aws_lb_target_group" "alb_tg" {
-  name     = "targetgroup-of-alb"
-  port     = 443
-  protocol = "HTTPS"
-  vpc_id   = module.vpc.vpc_id
-}
+# resource "aws_lb_target_group" "alb_tg" {
+#   name     = "targetgroup-of-alb"
+#   port     = 443
+#   protocol = "HTTPS"
+#   vpc_id   = module.vpc.vpc_id
+# }
 
 resource "aws_lb_listener" "listener_https" {
   load_balancer_arn = aws_lb.alb.arn
@@ -148,6 +148,7 @@ resource "aws_lb_listener" "listener_http" {
   load_balancer_arn = aws_lb.alb.arn
   port              = "80"
   protocol          = "HTTP"
+  certificate_arn = aws_acm_certificate.mglab-cert.arn
 
   default_action {
     type = "redirect"
@@ -159,12 +160,36 @@ resource "aws_lb_listener" "listener_http" {
   }
 }
 
-resource "aws_lb_listener_certificate" "alb_listener_cert" {
-  listener_arn    = aws_lb_listener.listener_https.arn
-  certificate_arn = aws_acm_certificate.mglab-cert.arn
-}
-# resource "aws_lb_target_group_attachment" "test" {
-#   target_group_arn = aws_lb_target_group.test.arn
-#   target_id        = aws_instance.test.id
-#   port             = 80
+# resource "aws_lb_listener_certificate" "alb_listener_cert" {
+#   listener_arn    = aws_lb_listener.listener_https.arn
+#   certificate_arn = aws_acm_certificate.mglab-cert.arn
 # }
+
+# resource "aws_lb_target_group_attachment" "test" {
+#   target_group_arn = aws_lb_target_group.alb_tg.arn
+#   target_id        = aws_autoscaling_group.pgadmin_asg
+#   port             = 443
+#   depends_on = [ aws_autoscaling_group.pgadmin_asg ]
+# }
+
+# resource "aws_launch_template" "asg_template" {
+#   name_prefix   = "asg_launch_temp"
+#   image_id      = "ami-03aefa83246f44ef2"
+#   instance_type = "t3.micro"
+# }
+
+# resource "aws_autoscaling_group" "pgadmin_asg" {
+#   availability_zones = local.availability-zones
+#   desired_capacity   = 2
+#   max_size           = 3
+#   min_size           = 2
+#   health_check_grace_period = 400
+#   health_check_type         = "ELB"
+#   target_group_arns = [aws_lb_target_group.alb_tg.arn]
+
+#   launch_template {
+#     id = aws_launch_template.asg_template.id
+#     version = "$Latest"
+#   }
+# }
+

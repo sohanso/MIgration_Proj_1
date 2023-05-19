@@ -87,7 +87,15 @@ resource "aws_security_group" "pgadmin_sg" {
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
+    # cidr_blocks      = ["10.0.0.0/20"]
     security_groups = [aws_security_group.alb_sg.id]
+  }
+  ingress {
+    description      = "ssh connection"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["10.0.0.0/20"]
   }
   egress {
     from_port        = 0

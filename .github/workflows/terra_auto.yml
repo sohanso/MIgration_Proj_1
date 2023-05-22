@@ -5,7 +5,7 @@ on:
       - main
       - test
 jobs:
-  terraform deploy:
+  terraform-deploy:
     runs-on: ubuntu-latest
     permissions:
       packages: write

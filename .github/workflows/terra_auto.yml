@@ -2,7 +2,8 @@ name: Automation of terraform deployments on pull to MAINS
 on:
   push:
     branches:
-      main
+      - main
+      - test
 jobs:
   terraform deploy:
     runs-on: ubuntu-latest

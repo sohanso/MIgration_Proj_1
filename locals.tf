@@ -9,8 +9,3 @@ locals {
   database_subnet_cidr_onprem    = cidrsubnet(var.on-prem-vpc-cidr, 5, 2)
 
 }
-
-# output "aws_private_subnet_ids" {
-#   value = module.vpc.private_subnets.id
-  
-# }

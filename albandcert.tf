@@ -97,6 +97,13 @@ resource "aws_security_group" "pgadmin_sg" {
     protocol         = "tcp"
     cidr_blocks      = ["10.0.0.0/20"]
   }
+  ingress {
+    description      = "http from VPC"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["10.0.0.0/20"]
+  }
   egress {
     from_port        = 0
     to_port          = 0
@@ -126,14 +133,24 @@ resource "aws_lb" "alb" {
   }
 }
 
-# ## TARGET GROUP AND LISTENER ##
+## TARGET GROUP AND LISTENER ##
 
 resource "aws_lb_target_group" "alb_tg" {
-  name     = "targetgroup-of-alb"
-  port     = 443
-  protocol = "HTTPS"
+  name     = "targetgroup-of-alb" 
+  port     = 80
+  protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
+  health_check {
+    enabled = true
+    healthy_threshold = 5
+    unhealthy_threshold = 2
+    interval = 30
+    path = "/"
+    port = 80
+    protocol = "HTTP"
+  }
 }
+
 
 resource "aws_lb_listener" "listener_https" {
   load_balancer_arn = aws_lb.alb.arn
@@ -146,7 +163,16 @@ resource "aws_lb_listener" "listener_https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.alb_tg.arn
   }
+#   default_action {
+#     type = "fixed-response"
+
+#     fixed_response {
+#       content_type = "text/plain"
+#       message_body = "Fixed response content"
+#       status_code  = "200"
+#     }
 }
+
 
 resource "aws_lb_listener" "listener_http" {
   load_balancer_arn = aws_lb.alb.arn
@@ -168,12 +194,12 @@ resource "aws_lb_listener_certificate" "alb_listener_cert" {
   certificate_arn = aws_acm_certificate.mglab-cert.arn
 }
 
-# resource "aws_lb_target_group_attachment" "test" {
-#   target_group_arn = aws_lb_target_group.alb_tg.arn
-#   target_id        = aws_autoscaling_group.pgadmin_asg
-#   port             = 443
-#   depends_on = [ aws_autoscaling_group.pgadmin_asg ]
-# }
+# # resource "aws_lb_target_group_attachment" "test" {
+# #   target_group_arn = aws_lb_target_group.alb_tg.arn
+# #   target_id        = aws_autoscaling_group.pgadmin_asg
+# #   port             = 443
+# #   depends_on = [ aws_autoscaling_group.pgadmin_asg ]
+# # }
 
 
 

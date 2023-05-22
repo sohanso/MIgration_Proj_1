@@ -1,5 +1,6 @@
 variable "cloud-vpc-cidr" {
-  description = " Variable to declare VPC CIDR range"
+  description = "Variable to declare VPC CIDR range"
+  type = string
 }
 
 variable "cloud-vpc-name" {

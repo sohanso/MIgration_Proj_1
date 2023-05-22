@@ -25,3 +25,6 @@ variable "number-of-azs-on-prem" {
   description = " Number of azs"
 }
 
+variable "ami_id_for_asg" {
+  description = "id of ami"
+}

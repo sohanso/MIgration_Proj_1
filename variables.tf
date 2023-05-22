@@ -1,6 +1,7 @@
 variable "cloud-vpc-cidr" {
   description = "Variable to declare VPC CIDR range"
   type        = string
+  default     = "10.0.0.0/20"
 }
 
 variable "cloud-vpc-name" {

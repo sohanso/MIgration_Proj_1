@@ -7,6 +7,6 @@ locals {
   public_subnet_cidr_onprem   = cidrsubnet(var.on-prem-vpc-cidr, 4, 0)
   private_subnet_cidr_onprem  = cidrsubnet(var.on-prem-vpc-cidr, 3, 1)
   database_subnet_cidr_onprem = cidrsubnet(var.on-prem-vpc-cidr, 5, 2)
-  region = "eu-central-1"
-  
+  region                      = "eu-central-1"
+
 }

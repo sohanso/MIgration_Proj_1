@@ -2,7 +2,7 @@
 ## A record ##
 resource "aws_route53_record" "record_a" {
   zone_id = data.aws_route53_zone.sohan-mglab.zone_id
-  name = ""
+  name    = ""
   type    = "A"
   alias {
     name                   = aws_lb.alb.dns_name
@@ -51,25 +51,25 @@ resource "aws_security_group" "alb_sg" {
   description = "Allow TLS inbound traffic"
   vpc_id      = module.vpc.vpc_id
   ingress {
-    description      = "TLS from VPC"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "TLS from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    description      = "http from VPC"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    description = "http from VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -83,17 +83,32 @@ resource "aws_security_group" "pgadmin_sg" {
   description = "Allow ALB inbound traffic"
   vpc_id      = module.vpc.vpc_id
   ingress {
-    description      = "ALB connection from VPC"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
+    description = "ALB connection from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    # cidr_blocks      = ["10.0.0.0/20"]
     security_groups = [aws_security_group.alb_sg.id]
   }
+  ingress {
+    description = "ssh connection"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/20"]
+  }
+  ingress {
+    description = "http from VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/20"]
+  }
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
     Project = "Migration-1"
@@ -118,14 +133,24 @@ resource "aws_lb" "alb" {
   }
 }
 
-# ## TARGET GROUP AND LISTENER ##
+## TARGET GROUP AND LISTENER ##
 
 resource "aws_lb_target_group" "alb_tg" {
   name     = "targetgroup-of-alb"
-  port     = 443
-  protocol = "HTTPS"
+  port     = 80
+  protocol = "HTTP"
   vpc_id   = module.vpc.vpc_id
+  health_check {
+    enabled             = true
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+    interval            = 30
+    path                = "/"
+    port                = 80
+    protocol            = "HTTP"
+  }
 }
+
 
 resource "aws_lb_listener" "listener_https" {
   load_balancer_arn = aws_lb.alb.arn
@@ -138,7 +163,16 @@ resource "aws_lb_listener" "listener_https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.alb_tg.arn
   }
+  #   default_action {
+  #     type = "fixed-response"
+
+  #     fixed_response {
+  #       content_type = "text/plain"
+  #       message_body = "Fixed response content"
+  #       status_code  = "200"
+  #     }
 }
+
 
 resource "aws_lb_listener" "listener_http" {
   load_balancer_arn = aws_lb.alb.arn
@@ -149,8 +183,8 @@ resource "aws_lb_listener" "listener_http" {
     type = "redirect"
     redirect {
       status_code = "HTTP_301"
-      port = "443"
-      protocol = "HTTPS"     
+      port        = "443"
+      protocol    = "HTTPS"
     }
   }
 }
@@ -160,12 +194,12 @@ resource "aws_lb_listener_certificate" "alb_listener_cert" {
   certificate_arn = aws_acm_certificate.mglab-cert.arn
 }
 
-# resource "aws_lb_target_group_attachment" "test" {
-#   target_group_arn = aws_lb_target_group.alb_tg.arn
-#   target_id        = aws_autoscaling_group.pgadmin_asg
-#   port             = 443
-#   depends_on = [ aws_autoscaling_group.pgadmin_asg ]
-# }
+# # resource "aws_lb_target_group_attachment" "test" {
+# #   target_group_arn = aws_lb_target_group.alb_tg.arn
+# #   target_id        = aws_autoscaling_group.pgadmin_asg
+# #   port             = 443
+# #   depends_on = [ aws_autoscaling_group.pgadmin_asg ]
+# # }
 
 
 

@@ -4,7 +4,7 @@ variable "cloud-vpc-cidr" {
 
 variable "cloud-vpc-name" {
   description = " Name of cloud VPC"
-  type = string
+  type        = string
 }
 
 variable "number-of-azs" {
@@ -17,7 +17,7 @@ variable "on-prem-vpc-cidr" {
 
 variable "on-prem-vpc-name" {
   description = " Name of cloud VPC"
-  type = string
+  type        = string
 }
 variable "number-of-azs-on-prem" {
   description = " Number of azs"
@@ -25,5 +25,5 @@ variable "number-of-azs-on-prem" {
 
 variable "ami_id_for_asg" {
   description = "ami id from console - amazon linux 2"
-  
+
 }

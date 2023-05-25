@@ -10,8 +10,8 @@ module "vpc" {
   database_subnets        = [for i, v in local.availability-zones : cidrsubnet(local.database_subnet_cidr, 2, i)]
   public_subnets          = [for i, v in local.availability-zones : cidrsubnet(local.public_subnet_cidr, 2, i)]
   map_public_ip_on_launch = true
-  enable_nat_gateway      = true
-  single_nat_gateway      = true
+  enable_nat_gateway      = false
+  single_nat_gateway      = false
   one_nat_gateway_per_az  = false
 
   tags = {
@@ -32,8 +32,8 @@ module "vpc-on-prem" {
   public_subnets          = [for i, v in local.availability-zones : cidrsubnet(local.public_subnet_cidr_onprem, 2, i)]
   map_public_ip_on_launch = true
 
-  enable_nat_gateway     = false
-  single_nat_gateway     = false
+  enable_nat_gateway     = true
+  single_nat_gateway     = true
   one_nat_gateway_per_az = false
 
   tags = {

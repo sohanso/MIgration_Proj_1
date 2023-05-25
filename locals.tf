@@ -8,5 +8,6 @@ locals {
   private_subnet_cidr_onprem  = cidrsubnet(var.on-prem-vpc-cidr, 3, 1)
   database_subnet_cidr_onprem = cidrsubnet(var.on-prem-vpc-cidr, 5, 2)
   region                      = "eu-central-1"
+  mysql_root_password         = "Admin@1234"
 
 }

@@ -1,7 +1,6 @@
 variable "cloud-vpc-cidr" {
   description = "Variable to declare VPC CIDR range"
   type        = string
-  default     = "10.0.0.0/20"
 }
 
 variable "cloud-vpc-name" {
@@ -28,3 +27,10 @@ variable "number-of-azs-on-prem" {
 variable "ami_id_for_asg" {
   description = "id of ami"
 }
+variable "ami_for_appserver" {
+  description = "id of ami"
+}
+
+# variable "mysql_root_password" {
+#   description = "mysql root password"
+# }

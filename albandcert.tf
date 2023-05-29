@@ -1,5 +1,5 @@
 
-## A record ##
+# A record ##
 resource "aws_route53_record" "record_a" {
   zone_id = data.aws_route53_zone.sohan-mglab.zone_id
   name    = ""
@@ -133,7 +133,7 @@ resource "aws_lb" "alb" {
   }
 }
 
-## TARGET GROUP AND LISTENER ##
+# TARGET GROUP AND LISTENER ##
 
 resource "aws_lb_target_group" "alb_tg" {
   name     = "targetgroup-of-alb"
@@ -194,12 +194,34 @@ resource "aws_lb_listener_certificate" "alb_listener_cert" {
   certificate_arn = aws_acm_certificate.mglab-cert.arn
 }
 
-# # resource "aws_lb_target_group_attachment" "test" {
-# #   target_group_arn = aws_lb_target_group.alb_tg.arn
-# #   target_id        = aws_autoscaling_group.pgadmin_asg
-# #   port             = 443
-# #   depends_on = [ aws_autoscaling_group.pgadmin_asg ]
-# # }
 
-
+## BastionHost Security Group ##
+resource "aws_security_group" "bastion_sg" {
+  name        = "bastion_public server_sg"
+  description = "Allow bastion inbound traffic"
+  vpc_id      = module.vpc.vpc_id
+  ingress {
+    description = "ssh connection"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "http from VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Project = "Migration-1"
+  }
+}
 

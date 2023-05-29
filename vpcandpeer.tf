@@ -32,11 +32,32 @@ module "vpc-on-prem" {
   public_subnets          = [for i, v in local.availability-zones : cidrsubnet(local.public_subnet_cidr_onprem, 2, i)]
   map_public_ip_on_launch = true
 
-  enable_nat_gateway     = true
-  single_nat_gateway     = true
+  enable_nat_gateway     = false
+  single_nat_gateway     = false
   one_nat_gateway_per_az = false
 
   tags = {
+    Project = "Migration-1"
+  }
+}
+
+## VPC PEERING CONNECTION ##
+
+resource "aws_vpc_peering_connection" "peering_mg" {
+  peer_owner_id = var.peer_owner_id
+  peer_vpc_id   = module.vpc-on-prem.vpc_id
+  vpc_id        = module.vpc.vpc_id
+  auto_accept   = true
+  accepter {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  requester {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  tags = {
+    Name = "Main-peering"
     Project = "Migration-1"
   }
 }

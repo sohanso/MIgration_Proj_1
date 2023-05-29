@@ -37,3 +37,9 @@ data "aws_subnet" "private_subnet_1" {
     values = ["on-prem-vpc-private-eu-central-1a"]
   }
 }
+data "aws_subnet" "db_subnet_1" {
+  filter {
+    name   = "tag:Name"
+    values = ["cloud-vpc-db-eu-central-1a"]
+  }
+}

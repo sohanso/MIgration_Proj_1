@@ -30,7 +30,35 @@ variable "ami_id_for_asg" {
 variable "ami_for_appserver" {
   description = "id of ami"
 }
-
-# variable "mysql_root_password" {
-#   description = "mysql root password"
+variable "rds_engine" {
+  description = "engine for rds"
+}
+variable "rds_engine_ver" {
+  description = "version of rds engine"
+}
+variable "rds_name" {
+  description = "name of rds "
+}
+variable "rds_username" {
+  description = "user name of rds "
+}
+# variable "dbname" {
+#   description = "name of db to be created"
 # }
+
+variable "restore_to_point_in_time" {
+  description = "nested block: NestingList, min items: 0, max items: 1"
+  type = set(object(
+    {
+      restore_time                  = string
+      source_db_instance_identifier = string
+      source_dbi_resource_id        = string
+      use_latest_restorable_time    = bool
+    }
+  ))
+  default = []
+}
+
+variable "peer_owner_id" {
+  description = "name of rds "
+}

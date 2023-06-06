@@ -2,7 +2,7 @@
 resource "aws_db_instance" "migration_rds_postgre" {
     instance_class       = "db.t3.medium"
     identifier           = var.rds_name
-    db_name              = null
+    db_name              = "rdscustomerdb"
     allocated_storage    = 20
     apply_immediately    = true
     availability_zone    = local.availability-zones[0]
@@ -16,8 +16,8 @@ resource "aws_db_instance" "migration_rds_postgre" {
     storage_type         = "gp3"
     port                 = 5432
     storage_encrypted    = true
-    manage_master_user_password = true
     username             = var.rds_username
+    password             = var.rds_password
     skip_final_snapshot  = true
     maintenance_window   = "Sun:10:00-Sun:10:32"
     vpc_security_group_ids = [aws_security_group.pg_rds_sg.id]
@@ -46,7 +46,15 @@ resource "aws_security_group" "pg_rds_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    security_groups = [aws_security_group.pgadmin_sg.id, aws_security_group.bastion_sg.id]
+    cidr_blocks = [var.on-prem-vpc-cidr, var.cloud-vpc-cidr]
+
+  }
+  ingress {
+    description = "open to asg ec2"
+    from_port   = 20
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.on-prem-vpc-cidr, var.cloud-vpc-cidr]
   }
   egress {
     from_port   = 0

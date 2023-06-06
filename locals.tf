@@ -10,5 +10,6 @@ locals {
   region                      = "eu-central-1"
   mysql_root_password         = "Admin@1234"
   db_subnet_group_name = "cloud-vpc"
+  dms_private_ip = "10.0.1.13"
 
 }

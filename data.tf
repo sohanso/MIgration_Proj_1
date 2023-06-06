@@ -43,3 +43,16 @@ data "aws_subnet" "db_subnet_1" {
     values = ["cloud-vpc-db-eu-central-1a"]
   }
 }
+
+data "aws_iam_policy_document" "dms_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      identifiers = ["dms.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+

@@ -44,25 +44,20 @@ resource "aws_security_group" "on_prem_app_sg" {
 
   ingress {
     description = "open to internet"
-    from_port   = 80
+    from_port   = 20
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.open-to-public, var.cloud-vpc-cidr]
   }
   ingress {
     description = "open to internet"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.open-to-public]
   }
-  ingress {
-    description = "open to internet"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
+  
   egress {
     from_port   = 0
     to_port     = 0

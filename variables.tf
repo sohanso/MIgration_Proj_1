@@ -15,6 +15,9 @@ variable "number-of-azs" {
 variable "on-prem-vpc-cidr" {
   description = " Variable to declare VPC CIDR range"
 }
+variable "open-to-public" {
+  description = " open to public VPC CIDR range"
+}
 
 variable "on-prem-vpc-name" {
   description = " Name of cloud VPC"
@@ -30,6 +33,9 @@ variable "ami_id_for_asg" {
 variable "ami_for_appserver" {
   description = "id of ami"
 }
+variable "ami_for_dbserver" {
+  description = "id of ami"
+}
 variable "rds_engine" {
   description = "engine for rds"
 }
@@ -42,9 +48,9 @@ variable "rds_name" {
 variable "rds_username" {
   description = "user name of rds "
 }
-# variable "dbname" {
-#   description = "name of db to be created"
-# }
+variable "rds_password" {
+  description = "password name of rds "
+}
 
 variable "restore_to_point_in_time" {
   description = "nested block: NestingList, min items: 0, max items: 1"
@@ -62,3 +68,6 @@ variable "restore_to_point_in_time" {
 variable "peer_owner_id" {
   description = "name of rds "
 }
+# variable "dms_private_ip" {
+#   description = "name of rds "
+# }

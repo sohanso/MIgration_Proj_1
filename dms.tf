@@ -55,30 +55,30 @@ resource "aws_dms_replication_subnet_group" "replication_subnet_group" {
 
 
 
-# ##REPLICATION INSTANCE ##
-# resource "aws_dms_replication_instance" "mg_dms_replication" {
-#   allocated_storage            = 8
-#   apply_immediately            = true
-#   auto_minor_version_upgrade   = true
-#   availability_zone            = local.availability-zones[0]
-#   publicly_accessible          = false
-#   replication_instance_class   = "dms.t3.micro"
-#   replication_instance_id      = "mg-dms-replication-instance"
-#   replication_subnet_group_id  = aws_dms_replication_subnet_group.replication_subnet_group.id
+##REPLICATION INSTANCE ##
+resource "aws_dms_replication_instance" "mg_dms_replication" {
+  allocated_storage            = 8
+  apply_immediately            = true
+  auto_minor_version_upgrade   = true
+  availability_zone            = local.availability-zones[0]
+  publicly_accessible          = false
+  replication_instance_class   = "dms.t3.micro"
+  replication_instance_id      = "mg-dms-replication-instance"
+  replication_subnet_group_id  = aws_dms_replication_subnet_group.replication_subnet_group.id
 
-#   tags = {
-#     Name = "mg_dms_replication_instance"
-#     Project = "Migration-1"
-#   }
+  tags = {
+    Name = "mg_dms_replication_instance"
+    Project = "Migration-1"
+  }
 
-#   vpc_security_group_ids = [aws_security_group.dms_replication_instance_sg.id]
+  vpc_security_group_ids = [aws_security_group.dms_replication_instance_sg.id]
 
-#   depends_on = [
-#     aws_iam_role_policy_attachment.dms-access-for-endpoint-AmazonDMSRedshiftS3Role,
-#     aws_iam_role_policy_attachment.dms-cloudwatch-logs-role-AmazonDMSCloudWatchLogsRole,
-#     aws_iam_role_policy_attachment.dms-vpc-role-AmazonDMSVPCManagementRole
-#   ]
-# }
+  depends_on = [
+    aws_iam_role_policy_attachment.dms-access-for-endpoint-AmazonDMSRedshiftS3Role,
+    aws_iam_role_policy_attachment.dms-cloudwatch-logs-role-AmazonDMSCloudWatchLogsRole,
+    aws_iam_role_policy_attachment.dms-vpc-role-AmazonDMSVPCManagementRole
+  ]
+}
 
 ## DMS replication instance sg ##
 resource "aws_security_group" "dms_replication_instance_sg" {
